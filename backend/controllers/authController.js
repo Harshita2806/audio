@@ -11,66 +11,50 @@ const generateToken = (id) => {
 };
 
 // ─── POST /api/auth/register ──────────────────────────────────────────────────
+// REGISTER
 const register = async (req, res) => {
     try {
         const { name, email, password, role } = req.body;
-
-        if (!name || !email || !password) {
-            return res.status(400).json({ success: false, message: 'Please provide name, email and password' });
-        }
 
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ success: false, message: 'Email already registered' });
         }
 
-        const allowedRoles = ['student', 'teacher'];
-        const userRole = allowedRoles.includes(role) ? role : 'student';
-
-        // Generate Verification Token
         const verificationToken = crypto.randomBytes(32).toString('hex');
 
         const user = await User.create({
             name,
             email,
             password,
-            role: userRole,
+            role,
             verificationToken,
-            verificationTokenExpires: Date.now() + 24 * 60 * 60 * 1000, // Expires in 24h
+            verificationTokenExpires: Date.now() + 24 * 60 * 60 * 1000,
             isVerified: false
         });
 
-        // Create verification URL
-        const verificationUrl = `${process.env.BASE_URL || 'http://localhost:5173'}/verify-email/${verificationToken}`;
+        // ✅ IMPORTANT CHANGE
+        const verificationUrl = `https://audio-iwm0.onrender.com/api/auth/verify-email/${verificationToken}`;
 
-        const message = `<h1>Welcome to AccessLearn!</h1>
-                        <p>Thank you for registering. Please verify your email by clicking the link below:</p>
-                        <a href="${verificationUrl}" target="_blank" style="padding: 10px 20px; background-color: #14b8a6; color: white; text-decoration: none; border-radius: 5px;">Verify Email Address</a>
-                        <p>This link will expire in 24 hours.</p>`;
+        const message = `
+            <h1>Verify your account</h1>
+            <a href="${verificationUrl}">Click to verify</a>
+        `;
 
-        try {
-            await sendEmail({
-                email: user.email,
-                subject: 'Verify your AccessLearn Account',
-                html: message,
-            });
+        await sendEmail({
+            email: user.email,
+            subject: 'Verify Email',
+            html: message,
+        });
 
-            res.status(201).json({
-                success: true,
-                message: 'Registration successful! Please check your email to verify your account.'
-            });
-        } catch (mailErr) {
-            console.error("DETAILED MAIL ERROR:", mailErr);
-            // If email fails, delete the user so they can try again with correct config
-            await User.findByIdAndDelete(user._id);
-            return res.status(500).json({
-                success: false,
-                message: 'Email could not be sent. Check backend credentials.'
-            });
-        }
+        res.status(201).json({
+            success: true,
+            message: 'Check your email to verify account'
+        });
+
     } catch (err) {
-        console.error("REGISTER ERROR:", err);
-        res.status(500).json({ success: false, message: 'Server Error' });
+        console.error(err);
+        res.status(500).json({ success: false });
     }
 };
 
@@ -85,24 +69,23 @@ const verifyEmail = async (req, res) => {
         });
 
         if (!user) {
-            return res.status(400).json({ success: false, message: 'Invalid or expired verification token' });
+            return res.redirect("https://audio-drab-xi.vercel.app/verify-failed");
         }
 
         user.isVerified = true;
         user.verificationToken = undefined;
         user.verificationTokenExpires = undefined;
-        await user.save({ validateBeforeSave: false });
 
-        res.status(200).json({
-            success: true,
-            message: 'Email verified successfully! You can now log in.'
-        });
+        await user.save();
+
+        // ✅ REDIRECT TO FRONTEND
+        return res.redirect("https://audio-drab-xi.vercel.app/login?verified=true");
+
     } catch (err) {
-        console.error("VERIFY ERROR:", err);
-        res.status(500).json({ success: false, message: 'Server Error' });
+        console.error(err);
+        res.redirect("https://audio-drab-xi.vercel.app/verify-failed");
     }
 };
-
 // ─── POST /api/auth/login ─────────────────────────────────────────────────────
 const login = async (req, res) => {
     try {
