@@ -1,8 +1,8 @@
 /**
- * API service – all calls go through Vite proxy (/api → http://localhost:5000)
+ * API service – Production ready (Vercel → Render)
  */
 
-const BASE = '/api';
+const BASE = 'https://audio-iwm0.onrender.com/api'; // ✅ UPDATED
 
 function getToken() {
     return localStorage.getItem('accesslearn_token');
@@ -11,10 +11,12 @@ function getToken() {
 async function request(method, endpoint, body = null, isFormData = false) {
     const headers = {};
     const token = getToken();
+
     if (token) headers['Authorization'] = `Bearer ${token}`;
     if (!isFormData) headers['Content-Type'] = 'application/json';
 
     const config = { method, headers };
+
     if (body) {
         config.body = isFormData ? body : JSON.stringify(body);
     }
@@ -28,7 +30,6 @@ async function request(method, endpoint, body = null, isFormData = false) {
                 const data = await res.json();
                 errorMessage = data.message || errorMessage;
             } catch {
-                // Response is not JSON, use status text
                 errorMessage = res.statusText || errorMessage;
             }
             throw new Error(errorMessage);
@@ -36,12 +37,13 @@ async function request(method, endpoint, body = null, isFormData = false) {
 
         const data = await res.json();
         return data;
+
     } catch (err) {
         if (err instanceof SyntaxError) {
-            throw new Error('Server returned invalid response. Please check if backend is running.');
+            throw new Error('Invalid server response');
         }
         if (err instanceof TypeError) {
-            throw new Error('Network error: Cannot reach server at http://localhost:5000. Please ensure backend is running.');
+            throw new Error('Network error: Cannot reach backend server');
         }
         throw err;
     }
@@ -51,8 +53,10 @@ async function request(method, endpoint, body = null, isFormData = false) {
 export const authAPI = {
     register: (payload) => request('POST', '/auth/register', payload),
     login: (payload) => request('POST', '/auth/login', payload),
-    // Add this line
+
+    // ⚠️ NOTE: Not needed now because backend handles redirect
     verifyEmail: (token) => request('GET', `/auth/verify-email/${token}`),
+
     getMe: () => request('GET', '/auth/me'),
     updateProfile: (payload) => request('PUT', '/auth/profile', payload),
 };
@@ -71,7 +75,9 @@ export const materialsAPI = {
     generateAudio: (id) => request('POST', `/materials/${id}/generate-audio`),
     generateQuiz: (id) => request('POST', `/materials/${id}/generate-quiz`),
     uploadAudio: (id, formData) => request('POST', `/materials/${id}/upload-audio`, formData, true),
-    streamUrl: (id) => `${BASE}/materials/${id}/stream`,
+
+    // ✅ Updated full URL
+    streamUrl: (id) => `https://audio-iwm0.onrender.com/api/materials/${id}/stream`,
 };
 
 // ─── Quizzes ──────────────────────────────────────────────────────────────────
