@@ -8,6 +8,7 @@ const chapterSchema = new mongoose.Schema({
     transcript: String,
 }, { _id: true });
 
+
 const quizQuestionSchema = new mongoose.Schema({
     question: { type: String, required: true },
     options: [String],          // 4 MCQ options
