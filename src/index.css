@@ -1,0 +1,197 @@
+/* Fonts — MUST come before @import "tailwindcss" */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  --font-main: "Inter", sans-serif;
+  --font-welcome: "Poppins", sans-serif;
+
+  /* Global Design System — Black / Teal / White */
+  --color-brand-bg: #050507;
+  --color-brand-card: #0a0a0f;
+  --color-brand-input: #111118;
+  --color-brand-primary: #2dd4bf;
+  --color-brand-text: #d1fae5;
+  --color-brand-focus: #2dd4bf;
+  --color-brand-border: rgba(45, 212, 191, 0.15);
+}
+
+
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-brand-bg);
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-main);
+  color: #ffffff;
+  line-height: 1.6;
+}
+
+/* Accessibility: Visible Focus Rings — teal */
+*:focus-visible {
+  outline: 2px solid var(--color-brand-focus);
+  outline-offset: 2px;
+}
+
+/* Custom Animations */
+@keyframes float {
+  0% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-15px) rotate(2deg);
+  }
+
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes wave {
+
+  0%,
+  100% {
+    transform: scaleY(0.5);
+  }
+
+  50% {
+    transform: scaleY(1.5);
+  }
+}
+
+.animate-float {
+  animation: float 8s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+
+.wave-bar {
+  animation: wave 1.2s ease-in-out infinite;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Accessibility Utilities ─────────────────────────────────────────────── */
+
+/* Screen-reader only — becomes visible when focused (skip links) */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Minimum 44×44 px touch targets */
+button,
+[role="button"],
+[role="tab"],
+[role="menuitem"],
+input[type="checkbox"],
+input[type="radio"],
+select {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Slider thumb — teal, large for easy touch */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #2dd4bf;
+  border: 3px solid #0a0a0f;
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #2dd4bf;
+  border: 3px solid #0a0a0f;
+  cursor: pointer;
+}
+
+/* Glassmorphism */
+.glass {
+  background: rgba(10, 10, 15, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Custom scrollbar — teal on dark */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0f;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #134e4a;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #2dd4bf;
+}
+
+/* High-contrast mode (Windows) */
+@media (forced-colors: active) {
+
+  button,
+  [role="button"] {
+    border: 2px solid ButtonText;
+    forced-color-adjust: none;
+    background: ButtonFace;
+    color: ButtonText;
+  }
+
+  :focus-visible {
+    outline: 3px solid Highlight;
+    outline-offset: 2px;
+  }
+}
